@@ -21,9 +21,13 @@ and others!.
 
 __author__ = " Nellman"
 
+from typing import List
 import pygame as pg
 import random
 from time import sleep
+from pygame.constants import KEYDOWN, K_DOWN, K_LEFT, K_RIGHT, K_UP, K_a, K_d, K_s, K_w, QUIT
+
+from pygame.event import Event
 from lib.nellmans_solution import ki
 
 
@@ -48,6 +52,8 @@ snake_len = 1
 snake_body_x = [x_snake]
 snake_body_y = [y_snake]
 
+# ticks per game loop / render frame
+tick_count = 1
 
 # initialising pygame
 pg.init()
@@ -66,25 +72,36 @@ def show_text(text, colour):
     dis.blit(message, [game_size_x/2, game_size_y/2])
 
 
-# gameloop
-while (dead == False):
-    change = False
+def tick(events: List[Event]):
+    # quick and N I C E
+    global snake_body_x
+    global snake_body_y
+    global game_size_x
+    global game_size_y
+    global x_snake
+    global y_snake
+    global x_food
+    global y_food
+    global score
+    global steps
+    global snake_len
+    global dead
 
-    for event in pg.event.get():
-        # print(event)
-        if event.type == pg.QUIT:
+    change = False
+    for event in events:
+        if event.type == QUIT:
             dead = True
 
         # button presses
-        if event.type == pg.KEYDOWN:  # key identifier https://www.pygame.org/docs/ref/key.html
+        if event.type == KEYDOWN:  # key identifier https://www.pygame.org/docs/ref/key.html
             change = True
-            if event.key == pg.K_a:
+            if event.key == K_a or event.key == K_LEFT:
                 x_snake -= 10
-            elif event.key == pg.K_d:
+            elif event.key == K_d or event.key == K_RIGHT:
                 x_snake += 10
-            elif event.key == pg.K_w:
+            elif event.key == K_w or event.key == K_UP:
                 y_snake -= 10
-            elif event.key == pg.K_s:
+            elif event.key == K_s or event.key == K_DOWN:
                 y_snake += 10
             else:
                 pass
@@ -133,6 +150,14 @@ while (dead == False):
         for i in range(0, (len(snake_body_x)-1)):
             if x_snake == snake_body_x[i] and y_snake == snake_body_y[i]:
                 dead = True
+
+# gameloop
+while (dead == False):
+    events = pg.event.get()
+    # update game state - repeat n ticks with same event
+    for _ in range(0, tick_count):
+        tick(events)
+        if dead: break
 
 # print all objects on screen
     dis.fill(green)
